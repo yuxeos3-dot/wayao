@@ -1,0 +1,41 @@
+# BrandSite Pro - Static Site Template
+# DOMAIN_NAME will be replaced by gen_configs.sh
+server {
+    listen 80;
+    server_name DOMAIN_NAME;
+
+    root /var/www/sites/DOMAIN_NAME;
+    index index.html;
+
+    # Security headers
+    add_header X-Frame-Options "SAMEORIGIN" always;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header Referrer-Policy "no-referrer-when-downgrade" always;
+
+    # Cache static assets
+    location ~* \.(css|js|png|jpg|jpeg|gif|ico|svg|woff2?)$ {
+        expires 30d;
+        add_header Cache-Control "public, immutable";
+    }
+
+    # HTML files - short cache for freshness
+    location ~* \.html$ {
+        expires 1h;
+        add_header Cache-Control "public, must-revalidate";
+    }
+
+    # SPA-style fallback
+    location / {
+        try_files $uri $uri/ $uri.html /index.html;
+    }
+
+    # Block sensitive paths
+    location ~ /\. { deny all; }
+    location = /robots.txt { access_log off; }
+    location = /sitemap.xml { access_log off; }
+
+    # Gzip
+    gzip on;
+    gzip_types text/plain text/css application/json application/javascript text/xml application/xml text/javascript;
+    gzip_min_length 1000;
+}

@@ -1,0 +1,49 @@
+{{ $p := .Site.Params }}
+{{ $pfx := $p.css_prefix }}
+
+<!-- Feature cards from feature_1/2/3 fields -->
+{{ if or $p.feature_1_title $p.feature_2_title $p.feature_3_title }}
+<section class="{{ $pfx }}-features" style="margin:2rem 0">
+  <h2>主要特色</h2>
+  <div class="{{ $pfx }}-feature-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem">
+    {{ if $p.feature_1_title }}
+    <div class="{{ $pfx }}-feature-card" style="padding:1.5rem;background:#f9f9f9;border-radius:8px;text-align:center">
+      {{ if $p.feature_1_icon }}<div style="font-size:2rem;margin-bottom:8px">{{ $p.feature_1_icon }}</div>{{ end }}
+      <h3 style="font-size:1rem;margin-bottom:8px">{{ $p.feature_1_title }}</h3>
+      <p style="font-size:0.875rem;color:#666">{{ $p.feature_1_desc }}</p>
+    </div>
+    {{ end }}
+    {{ if $p.feature_2_title }}
+    <div class="{{ $pfx }}-feature-card" style="padding:1.5rem;background:#f9f9f9;border-radius:8px;text-align:center">
+      {{ if $p.feature_2_icon }}<div style="font-size:2rem;margin-bottom:8px">{{ $p.feature_2_icon }}</div>{{ end }}
+      <h3 style="font-size:1rem;margin-bottom:8px">{{ $p.feature_2_title }}</h3>
+      <p style="font-size:0.875rem;color:#666">{{ $p.feature_2_desc }}</p>
+    </div>
+    {{ end }}
+    {{ if $p.feature_3_title }}
+    <div class="{{ $pfx }}-feature-card" style="padding:1.5rem;background:#f9f9f9;border-radius:8px;text-align:center">
+      {{ if $p.feature_3_icon }}<div style="font-size:2rem;margin-bottom:8px">{{ $p.feature_3_icon }}</div>{{ end }}
+      <h3 style="font-size:1rem;margin-bottom:8px">{{ $p.feature_3_title }}</h3>
+      <p style="font-size:0.875rem;color:#666">{{ $p.feature_3_desc }}</p>
+    </div>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
+
+<!-- Extra data fields from extra_data JSON -->
+{{ if $p.extra_data }}
+{{ $extra := $p.extra_data | transform.Unmarshal }}
+{{ if $extra }}
+<section class="{{ $pfx }}-extra-features" style="margin:2rem 0">
+  <div class="{{ $pfx }}-extra-grid" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem">
+    {{ range $k, $v := $extra }}
+    <div style="padding:1rem;background:#f0f4f8;border-radius:8px;text-align:center">
+      <div style="font-size:14px;color:#666">{{ $k }}</div>
+      <div style="font-size:18px;font-weight:bold;margin-top:4px">{{ $v }}</div>
+    </div>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
+{{ end }}

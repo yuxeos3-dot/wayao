@@ -1,0 +1,40 @@
+{{ $p := .Site.Params }}
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{{ $p.page_title | default .Title | default $p.brand_name }}</title>
+<meta name="description" content="{{ $p.meta_desc }}">
+<meta name="robots" content="index, follow">
+<link rel="canonical" href="{{ .Permalink }}">
+
+<!-- Open Graph -->
+<meta property="og:title" content="{{ $p.page_title | default $p.brand_name }}">
+<meta property="og:description" content="{{ $p.meta_desc }}">
+<meta property="og:type" content="website">
+<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:site_name" content="{{ $p.brand_name }}">
+<meta property="og:locale" content="{{ $p.market | default "zh_TW" }}">
+{{ if $p.tracker_url }}
+<meta property="og:image" content="{{ $p.tracker_url }}/og/{{ $p.site_id | default $p.primary_keyword }}.svg">
+{{ end }}
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="{{ $p.page_title | default $p.brand_name }}">
+<meta name="twitter:description" content="{{ $p.meta_desc }}">
+
+<!-- Schema JSON-LD -->
+{{ if $p.schema_json }}
+{{ $p.schema_json | safeHTML }}
+{{ end }}
+
+<!-- Theme Color -->
+<meta name="theme-color" content="{{ $p.brand_color | default "#1976D2" }}">
+
+<style>
+:root {
+  --primary: {{ $p.brand_color | default "#1976D2" }};
+  --primary-dark: {{ $p.brand_color_dark | default "#0D47A1" }};
+}
+{{ $p.css_noise | safeHTML }}
+</style>
+<link rel="stylesheet" href="/css/style.css?v={{ $p.build_id | default "1" }}">

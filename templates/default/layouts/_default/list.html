@@ -1,0 +1,10 @@
+{{ define "main" }}
+<div class="{{ .Site.Params.css_prefix }}-list">
+  {{ .Content }}
+  {{ range .Pages }}
+  <div class="{{ $.Site.Params.css_prefix }}-list-item">
+    <a href="{{ .Permalink }}">{{ .Title }}</a>
+  </div>
+  {{ end }}
+</div>
+{{ end }}

@@ -1,0 +1,26 @@
+{{ $p := .Site.Params }}
+{{ $pfx := $p.css_prefix }}
+
+<div class="{{ $pfx }}-sidebar-box" style="background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08);margin-bottom:1rem">
+  <h3>{{ $p.brand_name }}</h3>
+  {{ if $p.hero_subtitle }}<p>{{ $p.hero_subtitle }}</p>{{ end }}
+
+  {{ if $p.cta_text }}
+  <div style="margin-top:1rem;text-align:center">
+    <a href="{{ $p.redirect_url }}" class="{{ $pfx }}-cta-btn" rel="nofollow"
+       data-action="cta-sidebar"
+       onclick="{{ $p.track_fn_name }}(this); return false;"
+       style="display:block;padding:12px;background:{{ $p.brand_color }};color:#fff;border-radius:8px;text-decoration:none;font-weight:bold;text-align:center">{{ $p.cta_text }}</a>
+  </div>
+  {{ end }}
+</div>
+
+<div class="{{ $pfx }}-sidebar-box" style="background:#fff;padding:1.5rem;border-radius:8px;box-shadow:0 2px 8px rgba(0,0,0,.08)">
+  <h4>快速連結</h4>
+  <ul style="list-style:none;padding:0">
+    <li style="padding:4px 0"><a href="/about/">關於我們</a></li>
+    <li style="padding:4px 0"><a href="/methodology/">評測方法</a></li>
+    <li style="padding:4px 0"><a href="/responsible-gambling/">負責任博彩</a></li>
+    <li style="padding:4px 0"><a href="/disclaimer/">免責聲明</a></li>
+  </ul>
+</div>

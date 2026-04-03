@@ -1,0 +1,25 @@
+{{ $p := .Site.Params }}
+{{ $pfx := $p.css_prefix }}
+{{/* pros/cons are stored inside extra_data JSON as "pros" and "cons" arrays */}}
+{{ if $p.extra_data }}
+{{ $extra := $p.extra_data | transform.Unmarshal }}
+{{ if or (index $extra "pros") (index $extra "cons") }}
+<section class="{{ $pfx }}-pros-cons">
+  <h2>優缺點分析</h2>
+  <div class="{{ $pfx }}-pc-grid" style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;">
+    {{ with index $extra "pros" }}
+    <div class="{{ $pfx }}-pros" style="background:#e8f5e9;padding:1rem;border-radius:8px;">
+      <h3 style="color:#2e7d32">優點</h3>
+      <ul>{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
+    </div>
+    {{ end }}
+    {{ with index $extra "cons" }}
+    <div class="{{ $pfx }}-cons" style="background:#fce4ec;padding:1rem;border-radius:8px;">
+      <h3 style="color:#c62828">缺點</h3>
+      <ul>{{ range . }}<li>{{ . }}</li>{{ end }}</ul>
+    </div>
+    {{ end }}
+  </div>
+</section>
+{{ end }}
+{{ end }}

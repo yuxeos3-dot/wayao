@@ -1,0 +1,35 @@
+{{ define "main" }}
+{{ $p := .Site.Params }}
+{{ $pfx := $p.css_prefix }}
+
+<!-- Hero Section -->
+<section class="{{ $pfx }}-hero" style="background: linear-gradient(135deg, {{ $p.brand_color }}, {{ $p.brand_color_dark | default "#0D47A1" }})">
+  <div class="{{ $pfx }}-container">
+    <h1 class="{{ $pfx }}-hero-title">{{ $p.h1 | default $p.hero_title | default $p.brand_name }}</h1>
+    <p class="{{ $pfx }}-hero-desc">{{ $p.hero_subtitle }}</p>
+    {{ if $p.cta_text }}
+    <a href="{{ $p.redirect_url }}" class="{{ $pfx }}-cta-btn" rel="nofollow"
+       data-action="cta-hero"
+       onclick="{{ $p.track_fn_name }}(this); return false;">{{ $p.cta_text }}</a>
+    {{ if $p.cta_sub }}
+    <p class="{{ $pfx }}-cta-sub" style="font-size:0.85rem;color:rgba(255,255,255,0.7);margin-top:10px">{{ $p.cta_sub }}</p>
+    {{ end }}
+    {{ end }}
+  </div>
+</section>
+
+<!-- Features -->
+{{ partial "features.html" . }}
+
+<!-- Main Content -->
+<div class="{{ $pfx }}-content-wrap {{ $pfx }}-container">
+  <div class="{{ $pfx }}-main-col">
+    {{ partial "content-body.html" . }}
+    {{ partial "pros-cons.html" . }}
+    {{ partial "faq.html" . }}
+  </div>
+  <aside class="{{ $pfx }}-sidebar">
+    {{ partial "sidebar.html" . }}
+  </aside>
+</div>
+{{ end }}

@@ -1,0 +1,31 @@
+{{ $p := .Site.Params }}
+{{ if $p.tracker_url }}
+<script>
+(function(){
+  var T='{{ $p.tracker_url }}',S='{{ $p.primary_keyword | default .Site.Title }}';
+  function {{ $p.track_fn_name | default "_t" }}(a,l){
+    try{
+      var d={s:S,a:a,l:l||'',r:document.referrer};
+      navigator.sendBeacon?navigator.sendBeacon(T+'/t',JSON.stringify(d)):
+      fetch(T+'/t',{method:'POST',body:JSON.stringify(d),keepalive:true});
+    }catch(e){}
+  }
+  // PV
+  try{
+    var pv={s:S,p:location.pathname,r:document.referrer};
+    navigator.sendBeacon?navigator.sendBeacon(T+'/pv',JSON.stringify(pv)):
+    fetch(T+'/pv',{method:'POST',body:JSON.stringify(pv),keepalive:true});
+  }catch(e){}
+  // click tracking
+  document.addEventListener('click',function(e){
+    var el=e.target.closest('[data-action]');
+    if(el) {{ $p.track_fn_name | default "_t" }}(el.dataset.action, el.dataset.label||el.textContent.trim().slice(0,50));
+  });
+  // outbound link tracking
+  document.addEventListener('click',function(e){
+    var a=e.target.closest('a[href]');
+    if(a&&a.hostname!==location.hostname) {{ $p.track_fn_name | default "_t" }}('outbound',a.href);
+  });
+})();
+</script>
+{{ end }}

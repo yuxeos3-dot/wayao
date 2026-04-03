@@ -1,0 +1,33 @@
+{{ $p := .Site.Params }}
+{{ $pfx := $p.css_prefix }}
+<footer class="{{ $pfx }}-footer">
+  <div class="{{ $pfx }}-container">
+    {{ if $p.trust_badges }}
+    {{ $badges := $p.trust_badges | transform.Unmarshal }}
+    {{ if $badges }}
+    <div class="{{ $pfx }}-badges" style="display:flex;justify-content:center;gap:12px;flex-wrap:wrap;margin-bottom:16px">
+      {{ range $badges }}
+      <span class="{{ $pfx }}-badge" style="background:rgba(255,255,255,0.05);padding:4px 12px;border-radius:4px;font-size:0.75rem">{{ . }}</span>
+      {{ end }}
+    </div>
+    {{ end }}
+    {{ end }}
+    <div class="{{ $pfx }}-responsible" style="display:flex;justify-content:center;gap:16px;margin-bottom:12px;font-size:0.8rem">
+      <span>🔞 18+</span>
+      <span>請負責任地博彩</span>
+      <a href="/responsible-gambling/" style="color:#aaa">負責任博彩指南</a>
+    </div>
+    <div class="{{ $pfx }}-footer-links">
+      <a href="/about/">關於我們</a>
+      <a href="/methodology/">評測方法</a>
+      <a href="/privacy/">隱私政策</a>
+      <a href="/disclaimer/">免責聲明</a>
+      <a href="/responsible-gambling/">負責任博彩</a>
+      <a href="/contact/">聯繫我們</a>
+    </div>
+    <p class="{{ $pfx }}-footer-copy">&copy; {{ now.Year }} {{ $p.site_name }}. All rights reserved.</p>
+    <p class="{{ $pfx }}-footer-disclaimer" style="font-size:12px;color:#999;margin-top:8px">
+      本站內容僅供參考，請確認您所在地區的相關法規。必須年滿18歲方可瀏覽本站。
+    </p>
+  </div>
+</footer>

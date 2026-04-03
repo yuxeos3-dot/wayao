@@ -1,0 +1,29 @@
+{{ $p := .Site.Params }}
+{{ $pfx := $p.css_prefix }}
+{{ if $p.faq_items }}
+{{ $faqs := $p.faq_items | transform.Unmarshal }}
+{{ if $faqs }}
+<section class="{{ $pfx }}-faq"
+         itemscope itemtype="https://schema.org/FAQPage">
+  <h2>{{ $p.faq_title | default "常見問題" }}</h2>
+  {{ range $i, $faq := $faqs }}
+  <div class="{{ $pfx }}-faq-item"
+       itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+       style="margin-bottom:1rem;border:1px solid #e0e0e0;border-radius:8px;overflow:hidden;">
+    <button class="{{ $pfx }}-faq-q"
+            itemprop="name"
+            style="width:100%;padding:1rem;background:#f5f5f5;cursor:pointer;font-weight:bold;border:none;text-align:left;display:flex;justify-content:space-between"
+            onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+      {{ .q }}
+      <span>▾</span>
+    </button>
+    <div class="{{ $pfx }}-faq-a"
+         itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+         style="padding:1rem;display:none">
+      <p itemprop="text">{{ .a | safeHTML }}</p>
+    </div>
+  </div>
+  {{ end }}
+</section>
+{{ end }}
+{{ end }}

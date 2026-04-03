@@ -1,0 +1,90 @@
+{
+  "brand": {
+    "overview": [
+      "{keyword} 是什麼？完整介紹",
+      "關於 {keyword}：平台特色與優勢",
+      "{keyword} 適合哪些玩家？",
+      "了解 {keyword}：最新評測",
+      "{keyword} 核心特色分析",
+      "我們為什麼推薦 {keyword}？",
+      "深度解析 {keyword} 的優缺點"
+    ],
+    "bonus": [
+      "{keyword} 優惠活動完整介紹",
+      "{keyword} 首儲獎金詳解",
+      "如何領取 {keyword} 的優惠？",
+      "{keyword} 獎金方案說明",
+      "別錯過！{keyword} 限時優惠"
+    ],
+    "games": [
+      "{keyword} 遊戲種類一覽",
+      "{keyword} 提供哪些遊戲？",
+      "在 {keyword} 可以玩什麼遊戲？",
+      "{keyword} 熱門遊戲推薦"
+    ],
+    "payment": [
+      "{keyword} 存款方式詳解",
+      "如何在 {keyword} 儲值？",
+      "{keyword} 出金流程說明",
+      "{keyword} 提款速度實測"
+    ],
+    "safety": [
+      "{keyword} 安全嗎？合法性分析",
+      "{keyword} 牌照與監管資訊",
+      "為什麼玩家信任 {keyword}？"
+    ],
+    "conclusion": [
+      "我們的 {keyword} 評測總結",
+      "最終結論：{keyword} 適合你嗎？",
+      "給 {keyword} 玩家的最終建議"
+    ]
+  },
+  "game": {
+    "intro": [
+      "{keyword} 基本規則入門",
+      "{keyword} 是什麼？新手必看",
+      "如何開始玩 {keyword}？"
+    ],
+    "strategy": [
+      "{keyword} 必勝策略大公開",
+      "{keyword} 進階技巧分析",
+      "提高 {keyword} 勝率的方法",
+      "專家分享：{keyword} 投注策略"
+    ],
+    "platform": [
+      "哪裡可以玩 {keyword}？",
+      "推薦的 {keyword} 線上平台"
+    ]
+  },
+  "generic": {
+    "ranking": [
+      "最推薦的{keyword}排行",
+      "{keyword} TOP10完整排名",
+      "最值得玩的{keyword}推薦"
+    ],
+    "selection": [
+      "如何選擇適合的{keyword}？",
+      "選{keyword}前必看的5個關鍵"
+    ]
+  },
+  "promo": {
+    "what": [
+      "什麼是{keyword}？",
+      "{keyword}完整說明"
+    ],
+    "howto": [
+      "如何領取{keyword}？",
+      "{keyword}領取步驟圖解"
+    ]
+  },
+  "payment": {
+    "deposit": [
+      "如何儲值？完整教學",
+      "存款步驟圖解"
+    ],
+    "withdraw": [
+      "如何出金？完整教學",
+      "提款流程說明"
+    ]
+  }
+}
