@@ -98,7 +98,6 @@ func main() {
 	apiR.HandleFunc("/build/{id}/status", app.GetBuildStatus).Methods("GET")
 	apiR.HandleFunc("/build/{id}/log", app.GetBuildLog).Methods("GET")
 	apiR.HandleFunc("/build/batch", app.HandleBatchBuild).Methods("POST")
-	apiR.HandleFunc("/deploy/{id}", app.HandleDeploy).Methods("POST")
 
 	// Stats (extended)
 	apiR.HandleFunc("/stats/domain/{id}", app.GetDomainStats).Methods("GET")

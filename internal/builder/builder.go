@@ -142,7 +142,7 @@ func (b *Builder) BuildSite(domainID int64) error {
 	}
 
 	// 7. Update domain status
-	b.DB.Exec("UPDATE domains SET status='built', updated_at=CURRENT_TIMESTAMP WHERE id=?", domainID)
+	b.DB.Exec("UPDATE domains SET status='built', last_built_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE id=?", domainID)
 
 	duration := time.Since(start)
 	b.finishBuildLog(logID, "success", string(output), duration)
@@ -262,7 +262,8 @@ params:
   last_updated_iso: "%s"
   review_count: "%s"
   faq_title: "%s"
-  trust_badges: '%s'
+  trust_badges: |
+    %s
   disclosure: "%s"
   disclaimer: "%s"
   feature_1_icon: "%s"
@@ -299,7 +300,7 @@ params:
 		escYAML(authorName), escYAML(authorTitle), escYAML(authorBio),
 		escYAML(site.LastUpdated), escYAML(site.LastUpdatedISO), escYAML(site.ReviewCount),
 		escYAML(site.FAQTitle),
-		escYAML(site.TrustBadges), escYAML(site.Disclosure), escYAML(site.Disclaimer),
+		indentYAML(site.TrustBadges, "    "), escYAML(site.Disclosure), escYAML(site.Disclaimer),
 		escYAML(site.Feature1Icon), escYAML(site.Feature1Title), escYAML(site.Feature1Desc),
 		escYAML(site.Feature2Icon), escYAML(site.Feature2Title), escYAML(site.Feature2Desc),
 		escYAML(site.Feature3Icon), escYAML(site.Feature3Title), escYAML(site.Feature3Desc),
@@ -458,7 +459,7 @@ func (b *Builder) DeploySite(domainID int64) error {
 
 	if serverIP == "" {
 		// local deployment - already in place
-		b.DB.Exec("UPDATE domains SET status='active', updated_at=CURRENT_TIMESTAMP WHERE id=?", domainID)
+		b.DB.Exec("UPDATE domains SET status='active', last_deployed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE id=?", domainID)
 		return nil
 	}
 
@@ -477,7 +478,7 @@ func (b *Builder) DeploySite(domainID int64) error {
 		return fmt.Errorf("rsync: %s\n%w", string(output), err)
 	}
 
-	b.DB.Exec("UPDATE domains SET status='active', updated_at=CURRENT_TIMESTAMP WHERE id=?", domainID)
+	b.DB.Exec("UPDATE domains SET status='active', last_deployed_at=CURRENT_TIMESTAMP, updated_at=CURRENT_TIMESTAMP WHERE id=?", domainID)
 	log.Printf("[DEPLOY] %s -> %s", domain, target)
 	return nil
 }

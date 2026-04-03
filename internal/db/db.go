@@ -42,12 +42,7 @@ func seedTitlePool(db *sql.DB, dataDir string) {
 	titlesDir := filepath.Join(dataDir, "titles")
 	files, err := os.ReadDir(titlesDir)
 	if err != nil {
-		// titles dir doesn't exist in dataDir, try relative path
-		titlesDir = filepath.Join("data", "titles")
-		files, err = os.ReadDir(titlesDir)
-		if err != nil {
-			return
-		}
+		return
 	}
 	inserted := 0
 	for _, f := range files {
@@ -235,6 +230,7 @@ CREATE TABLE IF NOT EXISTS clicks (
     site_id    TEXT NOT NULL,
     domain_id  INTEGER REFERENCES domains(id),
     action     TEXT DEFAULT 'click',
+    label      TEXT DEFAULT '',
     ip         TEXT DEFAULT '',
     ua         TEXT DEFAULT '',
     referer    TEXT DEFAULT '',

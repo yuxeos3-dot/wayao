@@ -98,7 +98,7 @@ func (app *App) GetClicks(w http.ResponseWriter, r *http.Request) {
 	var total int
 	app.DB.QueryRow("SELECT COUNT(*) FROM clicks WHERE "+where, args...).Scan(&total)
 
-	query := fmt.Sprintf("SELECT id, site_id, action, ip, ua, referer, page_url, is_fraud, created_at FROM clicks WHERE %s ORDER BY id DESC LIMIT ? OFFSET ?", where)
+	query := fmt.Sprintf("SELECT id, site_id, action, label, ip, ua, referer, page_url, is_fraud, created_at FROM clicks WHERE %s ORDER BY id DESC LIMIT ? OFFSET ?", where)
 	args = append(args, size, offset)
 	rows, err := app.DB.Query(query, args...)
 	if err != nil {
@@ -110,11 +110,11 @@ func (app *App) GetClicks(w http.ResponseWriter, r *http.Request) {
 	var list []map[string]interface{}
 	for rows.Next() {
 		var id int64
-		var siteID, action, ip, ua, referer, pageURL, createdAt string
+		var siteID, action, label, ip, ua, referer, pageURL, createdAt string
 		var isFraud int
-		rows.Scan(&id, &siteID, &action, &ip, &ua, &referer, &pageURL, &isFraud, &createdAt)
+		rows.Scan(&id, &siteID, &action, &label, &ip, &ua, &referer, &pageURL, &isFraud, &createdAt)
 		list = append(list, map[string]interface{}{
-			"id": id, "site_id": siteID, "action": action,
+			"id": id, "site_id": siteID, "action": action, "label": label,
 			"ip": ip, "ua": ua, "referer": referer, "page_url": pageURL,
 			"is_fraud": isFraud == 1, "created_at": createdAt,
 		})

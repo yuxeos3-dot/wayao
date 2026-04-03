@@ -433,6 +433,8 @@ func (app *App) ImportDomain(w http.ResponseWriter, r *http.Request) {
 			"feature_1_icon": true, "feature_1_title": true, "feature_1_desc": true,
 			"feature_2_icon": true, "feature_2_title": true, "feature_2_desc": true,
 			"feature_3_icon": true, "feature_3_title": true, "feature_3_desc": true,
+			"author_avatar": true, "last_updated": true, "last_updated_iso": true,
+			"review_count": true, "related_pages": true, "content_angle": true,
 		}
 		app.DB.Exec("INSERT OR IGNORE INTO contents(domain_id) VALUES(?)", id)
 		for k, v := range req.Content {

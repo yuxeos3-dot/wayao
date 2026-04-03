@@ -83,11 +83,11 @@ async function deployOne(id) {
 }
 
 async function batchBuild() {
-  try { await api.batchDomainOp({ ids: selected.value.map(r => r.id), action: 'build' }); ElMessage.success('批量構建完成'); load() } catch (e) { ElMessage.error(e.message) }
+  try { await api.batchBuild({ ids: selected.value.map(r => r.id), action: 'build' }); ElMessage.success('批量構建已啟動'); setTimeout(load, 5000) } catch (e) { ElMessage.error(e.message) }
 }
 
 async function batchDeploy() {
-  try { await api.batchDomainOp({ ids: selected.value.map(r => r.id), action: 'deploy' }); ElMessage.success('批量部署完成'); load() } catch (e) { ElMessage.error(e.message) }
+  try { await api.batchBuild({ ids: selected.value.map(r => r.id), action: 'deploy' }); ElMessage.success('批量部署已啟動'); setTimeout(load, 5000) } catch (e) { ElMessage.error(e.message) }
 }
 
 async function showLog(id) {

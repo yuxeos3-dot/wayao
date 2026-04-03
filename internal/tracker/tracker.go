@@ -99,6 +99,7 @@ func (t *Tracker) HandleTrack(w http.ResponseWriter, r *http.Request) {
 	var req struct {
 		SiteID  string `json:"s"`
 		Action  string `json:"a"`
+		Label   string `json:"l"`
 		Referer string `json:"r"`
 		PageURL string `json:"p"`
 	}
@@ -127,9 +128,9 @@ func (t *Tracker) HandleTrack(w http.ResponseWriter, r *http.Request) {
 		isFraud = 1
 	}
 
-	// columns match db.go clicks table: site_id, action, ip, ua, referer, page_url, is_fraud
-	t.DB.Exec(`INSERT INTO clicks(site_id, action, ip, ua, referer, page_url, is_fraud) VALUES(?,?,?,?,?,?,?)`,
-		req.SiteID, req.Action, ip, ua, req.Referer, req.PageURL, isFraud)
+	// columns match db.go clicks table
+	t.DB.Exec(`INSERT INTO clicks(site_id, action, label, ip, ua, referer, page_url, is_fraud) VALUES(?,?,?,?,?,?,?,?)`,
+		req.SiteID, req.Action, req.Label, ip, ua, req.Referer, req.PageURL, isFraud)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.Write([]byte(`{"ok":1}`))
