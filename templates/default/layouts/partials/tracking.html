@@ -2,29 +2,42 @@
 {{ if $p.tracker_url }}
 <script>
 (function(){
-  var T='{{ $p.tracker_url }}',S='{{ $p.primary_keyword | default .Site.Title }}';
-  function {{ $p.track_fn_name | default "_t" }}(a,l){
-    try{
-      var d={s:S,a:a,l:l||'',r:document.referrer};
-      navigator.sendBeacon?navigator.sendBeacon(T+'/t',JSON.stringify(d)):
-      fetch(T+'/t',{method:'POST',body:JSON.stringify(d),keepalive:true});
-    }catch(e){}
-  }
-  // PV
-  try{
-    var pv={s:S,p:location.pathname,r:document.referrer};
-    navigator.sendBeacon?navigator.sendBeacon(T+'/pv',JSON.stringify(pv)):
-    fetch(T+'/pv',{method:'POST',body:JSON.stringify(pv),keepalive:true});
-  }catch(e){}
-  // click tracking
-  document.addEventListener('click',function(e){
-    var el=e.target.closest('[data-action]');
-    if(el) {{ $p.track_fn_name | default "_t" }}(el.dataset.action, el.dataset.label||el.textContent.trim().slice(0,50));
-  });
-  // outbound link tracking
-  document.addEventListener('click',function(e){
-    var a=e.target.closest('a[href]');
-    if(a&&a.hostname!==location.hostname) {{ $p.track_fn_name | default "_t" }}('outbound',a.href);
+  var T='{{ $p.tracker_url }}',S='{{ $p.site_id | default $p.primary_keyword }}',R='{{ $p.redirect_url }}';
+
+  // Track function (unique name per domain)
+  window.{{ $p.track_fn_name | default "_t" }} = function(el) {
+    var a = (el && el.dataset && el.dataset.action) || 'click';
+    var l = (el && (el.dataset.label || el.textContent)) || '';
+    var d = {s:S, a:a, l:l.trim().slice(0,50), r:document.referrer, p:location.href};
+    try {
+      if (navigator.sendBeacon) {
+        navigator.sendBeacon(T+'/t', JSON.stringify(d));
+      } else {
+        fetch(T+'/t',{method:'POST',body:JSON.stringify(d),keepalive:true});
+      }
+    } catch(e){}
+    // delay then redirect
+    setTimeout(function(){ location.href = R; }, 150);
+    return false;
+  };
+
+  // PV tracking
+  try {
+    var pv = {s:S, p:location.pathname, r:document.referrer};
+    if (navigator.sendBeacon) {
+      navigator.sendBeacon(T+'/pv', JSON.stringify(pv));
+    } else {
+      fetch(T+'/pv',{method:'POST',body:JSON.stringify(pv),keepalive:true});
+    }
+  } catch(e){}
+
+  // Outbound link tracking
+  document.addEventListener('click', function(e) {
+    var a = e.target.closest('a[href]');
+    if (a && a.hostname !== location.hostname) {
+      var d = {s:S, a:'outbound', r:document.referrer, p:a.href};
+      try { navigator.sendBeacon ? navigator.sendBeacon(T+'/t',JSON.stringify(d)) : fetch(T+'/t',{method:'POST',body:JSON.stringify(d),keepalive:true}); } catch(e){}
+    }
   });
 })();
 </script>

@@ -45,15 +45,29 @@ func GenerateSchema(site SiteData) string {
 		},
 	})
 
-	// 3. Article/Review schema based on keyword type
+	// 3. Keyword-type-specific schemas (enhanced for rich snippets)
+	pubDate := variation.RandomPublishDate(site.Domain)
+	modDate := time.Now().Format("2006-01-02")
+
 	switch site.KeywordType {
-	case "brand", "generic":
+	case "brand":
+		// Review + AggregateRating (gets star snippets in SERPs)
 		rating := getStr(site.ExtraFields, "overall_rating", "9.0")
+		reviewCount := getStr(site.ExtraFields, "review_count", "127")
 		schemas = append(schemas, map[string]interface{}{
-			"@type":       "Review",
+			"@type": "Review",
 			"itemReviewed": map[string]interface{}{
-				"@type": "Organization",
+				"@type": "SoftwareApplication",
 				"name":  site.PrimaryKeyword,
+				"applicationCategory": "GameApplication",
+				"operatingSystem":     "Web, iOS, Android",
+				"aggregateRating": map[string]interface{}{
+					"@type":       "AggregateRating",
+					"ratingValue": rating,
+					"bestRating":  "10",
+					"worstRating": "1",
+					"ratingCount": reviewCount,
+				},
 			},
 			"reviewRating": map[string]interface{}{
 				"@type":       "Rating",
@@ -61,31 +75,89 @@ func GenerateSchema(site SiteData) string {
 				"bestRating":  "10",
 				"worstRating": "1",
 			},
-			"author": map[string]interface{}{
-				"@type": "Organization",
-				"name":  site.SiteName,
-			},
-			"datePublished": variation.RandomPublishDate(site.Domain),
-			"dateModified":  time.Now().Format("2006-01-02"),
+			"author":        map[string]interface{}{"@type": "Person", "name": getStr(site.ExtraFields, "author_name", site.SiteName)},
+			"datePublished": pubDate,
+			"dateModified":  modDate,
 		})
-	case "game", "strategy":
+
+	case "generic", "region":
+		// ItemList for ranking/TOP pages (gets numbered list in SERPs)
+		top1 := getStr(site.ExtraFields, "top1_name", "")
+		if top1 != "" {
+			items := []map[string]interface{}{}
+			for i := 1; i <= 5; i++ {
+				name := getStr(site.ExtraFields, fmt.Sprintf("top%d_name", i), "")
+				if name == "" {
+					break
+				}
+				items = append(items, map[string]interface{}{
+					"@type": "ListItem", "position": i, "name": name,
+					"url": "https://" + site.Domain + "/#top" + fmt.Sprintf("%d", i),
+				})
+			}
+			schemas = append(schemas, map[string]interface{}{
+				"@type":           "ItemList",
+				"name":            site.MetaTitle,
+				"itemListElement": items,
+			})
+		}
+
+	case "game":
+		// HowTo schema (gets step-by-step rich snippets)
+		schemas = append(schemas, map[string]interface{}{
+			"@type":       "HowTo",
+			"name":        site.MetaTitle,
+			"description": site.MetaDesc,
+			"step": []map[string]interface{}{
+				{"@type": "HowToStep", "name": "了解基本規則", "text": "學習遊戲的基本規則和投注方式"},
+				{"@type": "HowToStep", "name": "選擇可靠平台", "text": "選擇持有合法牌照的線上平台"},
+				{"@type": "HowToStep", "name": "練習策略", "text": "從小注碼開始練習各種投注策略"},
+			},
+			"author":        map[string]interface{}{"@type": "Person", "name": getStr(site.ExtraFields, "author_name", "Editor")},
+			"datePublished": pubDate,
+			"dateModified":  modDate,
+		})
+
+	case "strategy":
 		schemas = append(schemas, map[string]interface{}{
 			"@type":         "Article",
 			"headline":      site.MetaTitle,
 			"description":   site.MetaDesc,
-			"datePublished": variation.RandomPublishDate(site.Domain),
-			"dateModified":  time.Now().Format("2006-01-02"),
-			"author": map[string]interface{}{
-				"@type": "Organization",
-				"name":  site.SiteName,
-			},
+			"articleSection": "博彩策略",
+			"datePublished": pubDate,
+			"dateModified":  modDate,
+			"author":        map[string]interface{}{"@type": "Person", "name": getStr(site.ExtraFields, "author_name", "Editor")},
 		})
+
 	case "sports":
 		schemas = append(schemas, map[string]interface{}{
-			"@type":         "SportsEvent",
-			"name":          site.PrimaryKeyword,
-			"description":   site.MetaDesc,
-			"url":           "https://" + site.Domain,
+			"@type":       "SportsEvent",
+			"name":        site.PrimaryKeyword,
+			"description": site.MetaDesc,
+			"url":         "https://" + site.Domain,
+		})
+
+	case "app":
+		// SoftwareApplication (gets app info rich snippets)
+		schemas = append(schemas, map[string]interface{}{
+			"@type":               "SoftwareApplication",
+			"name":                site.PrimaryKeyword,
+			"applicationCategory": "GameApplication",
+			"operatingSystem":     "iOS, Android",
+			"offers": map[string]interface{}{
+				"@type": "Offer", "price": "0", "priceCurrency": "TWD",
+			},
+		})
+
+	case "terms":
+		schemas = append(schemas, map[string]interface{}{
+			"@type":       "DefinedTerm",
+			"name":        site.PrimaryKeyword,
+			"description": site.MetaDesc,
+			"inDefinedTermSet": map[string]interface{}{
+				"@type": "DefinedTermSet",
+				"name":  "博弈術語詞典",
+			},
 		})
 	}
 
@@ -278,17 +350,47 @@ Sitemap: https://%s/sitemap.xml`, domain)
 func GenerateSitemapIndex(domain string, pages []string) string {
 	var sb strings.Builder
 	sb.WriteString(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">
 `)
+	now := time.Now().Format("2006-01-02")
 	for _, p := range pages {
+		priority := "0.8"
+		changefreq := "weekly"
+		if p == "/" {
+			priority = "1.0"
+			changefreq = "daily"
+		} else if p == "/about/" || p == "/methodology/" {
+			priority = "0.3"
+			changefreq = "monthly"
+		}
 		sb.WriteString(fmt.Sprintf(`  <url>
     <loc>https://%s%s</loc>
     <lastmod>%s</lastmod>
-    <changefreq>weekly</changefreq>
-    <priority>0.8</priority>
+    <changefreq>%s</changefreq>
+    <priority>%s</priority>
   </url>
-`, domain, p, time.Now().Format("2006-01-02")))
+`, domain, p, now, changefreq, priority))
 	}
 	sb.WriteString("</urlset>")
 	return sb.String()
+}
+
+// GenerateRobotsTxtEnhanced includes honeypot trap paths for bot detection
+func GenerateRobotsTxtEnhanced(domain string) string {
+	return fmt.Sprintf(`User-agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /wp-admin/
+Disallow: /wp-login.php
+Disallow: /.env
+Disallow: /private/
+Disallow: /internal-data/
+
+# Honeypot trap paths (legitimate bots respect Disallow)
+Disallow: /secret-admin-panel/
+Disallow: /backup-database/
+
+Sitemap: https://%s/sitemap.xml`, domain)
 }

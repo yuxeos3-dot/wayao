@@ -142,6 +142,66 @@ func LoadAuthors(data []byte) []Author {
 	return authors
 }
 
+// GetFontStack generates a unique font-family stack per domain (anti-fingerprint)
+func GetFontStack(domain string) string {
+	stacks := []string{
+		`-apple-system,BlinkMacSystemFont,"Noto Sans TC",Roboto,sans-serif`,
+		`"Noto Sans TC",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif`,
+		`-apple-system,"Noto Sans TC",BlinkMacSystemFont,Roboto,"Helvetica Neue",sans-serif`,
+		`BlinkMacSystemFont,-apple-system,"Noto Sans TC","Segoe UI",Roboto,sans-serif`,
+		`"Segoe UI",-apple-system,BlinkMacSystemFont,"Noto Sans TC",Roboto,sans-serif`,
+		`Roboto,"Noto Sans TC",-apple-system,BlinkMacSystemFont,sans-serif`,
+	}
+	h := fnv.New32a()
+	h.Write([]byte(domain + "font"))
+	return stacks[int(h.Sum32())%len(stacks)]
+}
+
+// GenerateFaviconSVG creates a unique favicon per domain from hash
+func GenerateFaviconSVG(domain, brandColor string) string {
+	h := fnv.New32a()
+	h.Write([]byte(domain + "fav"))
+	seed := h.Sum32()
+
+	if brandColor == "" {
+		brandColor = "#1976D2"
+	}
+	// deterministic shape: circle, square, or rounded-rect with first letter
+	letter := strings.ToUpper(domain[:1])
+	shapes := []string{
+		fmt.Sprintf(`<circle cx="16" cy="16" r="14" fill="%s"/>`, brandColor),
+		fmt.Sprintf(`<rect x="2" y="2" width="28" height="28" rx="6" fill="%s"/>`, brandColor),
+		fmt.Sprintf(`<rect x="2" y="2" width="28" height="28" rx="14" fill="%s"/>`, brandColor),
+	}
+	shape := shapes[seed%3]
+
+	svg := fmt.Sprintf(`%%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%%3E%s%%3Ctext x='16' y='22' text-anchor='middle' fill='white' font-size='18' font-weight='bold' font-family='sans-serif'%%3E%s%%3C/text%%3E%%3C/svg%%3E`,
+		strings.ReplaceAll(strings.ReplaceAll(shape, `"`, `'`), `<`, `%3C`),
+		letter)
+	// URL-encode the remaining < and >
+	svg = strings.ReplaceAll(svg, ">", "%3E")
+	return svg
+}
+
+// GenerateHreflangTags generates hreflang link tags for multi-market domains
+func GenerateHreflangTags(domain, lang string, siblings map[string]string) string {
+	if len(siblings) == 0 {
+		return ""
+	}
+	var sb strings.Builder
+	// self-referencing hreflang
+	sb.WriteString(fmt.Sprintf(`<link rel="alternate" hreflang="%s" href="https://%s/">`, lang, domain))
+	sb.WriteString("\n")
+	for hrefLang, hrefDomain := range siblings {
+		if hrefDomain != domain {
+			sb.WriteString(fmt.Sprintf(`<link rel="alternate" hreflang="%s" href="https://%s/">`, hrefLang, hrefDomain))
+			sb.WriteString("\n")
+		}
+	}
+	sb.WriteString(`<link rel="alternate" hreflang="x-default" href="https://` + domain + `/">`)
+	return sb.String()
+}
+
 // SortedKeys returns map keys in sorted order (for deterministic output)
 func SortedKeys(m map[string]interface{}) []string {
 	keys := make([]string, 0, len(m))

@@ -123,7 +123,7 @@ func (b *Builder) BuildSite(domainID int64) error {
 	}
 
 	// 6. Generate robots.txt and sitemap
-	robotsTxt := schema.GenerateRobotsTxt(site.Domain)
+	robotsTxt := schema.GenerateRobotsTxtEnhanced(site.Domain)
 	os.WriteFile(filepath.Join(outputDir, "robots.txt"), []byte(robotsTxt), 0644)
 
 	// Generate sitemap.xml
@@ -248,6 +248,10 @@ params:
   build_id: "%s"
   publish_date: "%s"
   site_year: "%d"
+  font_stack: "%s"
+  favicon_svg: "%s"
+  hreflang_tags: |
+    %s
   author_name: "%s"
   author_title: "%s"
   author_bio: "%s"
@@ -281,6 +285,9 @@ params:
 		site.Market, cssPrefix, trackFn, escYAML(cssNoise),
 		escYAML(trackerURL), escYAML(site.Domain),
 		buildID, publishDate, time.Now().Year(),
+		escYAML(variation.GetFontStack(site.Domain)),
+		variation.GenerateFaviconSVG(site.Domain, site.BrandColor),
+		"", // hreflang_tags placeholder - populated by cluster logic
 		escYAML(authorName), escYAML(authorTitle), escYAML(authorBio),
 		escYAML(site.FAQTitle),
 		escYAML(site.TrustBadges), escYAML(site.Disclosure), escYAML(site.Disclaimer),
@@ -360,7 +367,7 @@ func (b *Builder) loadSiteInfo(domainID int64) (*siteInfo, error) {
 }
 
 func (b *Builder) loadTitlePatterns(kwType string) []string {
-	rows, err := b.DB.Query("SELECT pattern FROM title_variants WHERE keyword_type=? AND is_active=1", kwType)
+	rows, err := b.DB.Query("SELECT template FROM title_pool WHERE keyword_type=? AND is_active=1", kwType)
 	if err != nil {
 		return nil
 	}

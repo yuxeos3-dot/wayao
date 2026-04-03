@@ -332,7 +332,7 @@ func (app *App) RemoveClusterMember(w http.ResponseWriter, r *http.Request) {
 // ========== Content Refresh ==========
 
 func (app *App) ListRefreshSchedule(w http.ResponseWriter, r *http.Request) {
-	rows, err := app.DB.Query(`SELECT s.id, s.domain_id, d.domain, s.cron_expr, s.last_run, s.next_run, s.is_active
+	rows, err := app.DB.Query(`SELECT s.id, s.domain_id, d.domain, s.refresh_type, s.frequency_days, s.last_refreshed, s.next_refresh, s.is_active
 		FROM content_refresh_schedule s JOIN domains d ON s.domain_id=d.id ORDER BY s.id`)
 	if err != nil {
 		jsonError(w, 500, err.Error())
@@ -342,13 +342,14 @@ func (app *App) ListRefreshSchedule(w http.ResponseWriter, r *http.Request) {
 	var list []map[string]interface{}
 	for rows.Next() {
 		var sid, did int64
-		var domain, cron string
-		var lastRun, nextRun *string
-		var isActive int
-		rows.Scan(&sid, &did, &domain, &cron, &lastRun, &nextRun, &isActive)
+		var domain, refreshType string
+		var freqDays, isActive int
+		var lastRefreshed, nextRefresh *string
+		rows.Scan(&sid, &did, &domain, &refreshType, &freqDays, &lastRefreshed, &nextRefresh, &isActive)
 		list = append(list, map[string]interface{}{
-			"id": sid, "domain_id": did, "domain": domain, "cron_expr": cron,
-			"last_run": lastRun, "next_run": nextRun, "is_active": isActive == 1,
+			"id": sid, "domain_id": did, "domain": domain, "refresh_type": refreshType,
+			"frequency_days": freqDays, "last_refreshed": lastRefreshed,
+			"next_refresh": nextRefresh, "is_active": isActive == 1,
 		})
 	}
 	if list == nil {
@@ -359,21 +360,29 @@ func (app *App) ListRefreshSchedule(w http.ResponseWriter, r *http.Request) {
 
 func (app *App) SaveRefreshSchedule(w http.ResponseWriter, r *http.Request) {
 	var req struct {
-		DomainID int64  `json:"domain_id"`
-		CronExpr string `json:"cron_expr"`
-		IsActive bool   `json:"is_active"`
+		DomainID      int64  `json:"domain_id"`
+		RefreshType   string `json:"refresh_type"`
+		FrequencyDays int    `json:"frequency_days"`
+		IsActive      bool   `json:"is_active"`
 	}
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		jsonError(w, 400, "invalid json")
 		return
 	}
+	if req.RefreshType == "" {
+		req.RefreshType = "timestamp"
+	}
+	if req.FrequencyDays < 1 {
+		req.FrequencyDays = 14
+	}
 	active := 0
 	if req.IsActive {
 		active = 1
 	}
-	app.DB.Exec(`INSERT INTO content_refresh_schedule(domain_id, cron_expr, is_active)
-		VALUES(?,?,?) ON CONFLICT(domain_id) DO UPDATE SET cron_expr=excluded.cron_expr, is_active=excluded.is_active`,
-		req.DomainID, req.CronExpr, active)
+	app.DB.Exec(`INSERT INTO content_refresh_schedule(domain_id, refresh_type, frequency_days, is_active, next_refresh)
+		VALUES(?,?,?,?, datetime('now', '+' || ? || ' days'))
+		ON CONFLICT(domain_id) DO UPDATE SET refresh_type=excluded.refresh_type, frequency_days=excluded.frequency_days, is_active=excluded.is_active`,
+		req.DomainID, req.RefreshType, req.FrequencyDays, active, req.FrequencyDays)
 	jsonOK(w, "saved")
 }
 
@@ -522,10 +531,11 @@ func (app *App) ListUARules(w http.ResponseWriter, r *http.Request) {
 	var list []map[string]interface{}
 	for rows.Next() {
 		var id int64
-		var pattern, action, reason, createdAt string
-		rows.Scan(&id, &pattern, &action, &reason, &createdAt)
+		var pattern, ruleType, createdAt string
+		var isActive int
+		rows.Scan(&id, &pattern, &ruleType, &isActive, &createdAt)
 		list = append(list, map[string]interface{}{
-			"id": id, "pattern": pattern, "action": action, "reason": reason, "created_at": createdAt,
+			"id": id, "pattern": pattern, "rule_type": ruleType, "is_active": isActive == 1, "created_at": createdAt,
 		})
 	}
 	if list == nil {
@@ -580,15 +590,15 @@ func (app *App) ExportDomain(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var content map[string]interface{}
-	var siteName, siteSlogan, brandColor, heroTitle, heroDesc, mainContent, metaTitle, metaDesc, faqJSON, extraJSON string
-	err = app.DB.QueryRow("SELECT site_name, site_slogan, brand_color, hero_title, hero_description, main_content, meta_title, meta_description, faq_json, extra_fields_json FROM contents WHERE domain_id=?", id).
-		Scan(&siteName, &siteSlogan, &brandColor, &heroTitle, &heroDesc, &mainContent, &metaTitle, &metaDesc, &faqJSON, &extraJSON)
+	var brandName, brandColor, heroTitle, heroSubtitle, bodyContent, pageTitle, metaDesc, faqItems, extraData string
+	err = app.DB.QueryRow("SELECT brand_name, brand_color, hero_title, hero_subtitle, body_content, page_title, meta_desc, faq_items, extra_data FROM contents WHERE domain_id=?", id).
+		Scan(&brandName, &brandColor, &heroTitle, &heroSubtitle, &bodyContent, &pageTitle, &metaDesc, &faqItems, &extraData)
 	if err == nil {
 		content = map[string]interface{}{
-			"site_name": siteName, "site_slogan": siteSlogan, "brand_color": brandColor,
-			"hero_title": heroTitle, "hero_description": heroDesc, "main_content": mainContent,
-			"meta_title": metaTitle, "meta_description": metaDesc,
-			"faq_json": faqJSON, "extra_fields_json": extraJSON,
+			"brand_name": brandName, "brand_color": brandColor,
+			"hero_title": heroTitle, "hero_subtitle": heroSubtitle, "body_content": bodyContent,
+			"page_title": pageTitle, "meta_desc": metaDesc,
+			"faq_items": faqItems, "extra_data": extraData,
 		}
 	}
 

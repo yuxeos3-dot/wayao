@@ -15,12 +15,12 @@
 
     <el-table :data="rankings" v-loading="loading" size="small">
       <el-table-column prop="keyword" label="關鍵詞" min-width="200" />
-      <el-table-column prop="position" label="排名" width="80">
+      <el-table-column prop="rank" label="排名" width="80">
         <template #default="{row}">
-          <el-tag :type="row.position<=3?'success':row.position<=10?'warning':'info'" size="small">{{ row.position || '-' }}</el-tag>
+          <el-tag :type="row.rank<=3?'success':row.rank<=10?'warning':'info'" size="small">{{ row.rank || '-' }}</el-tag>
         </template>
       </el-table-column>
-      <el-table-column prop="url" label="URL" min-width="200" />
+      <el-table-column prop="engine" label="引擎" width="80" />
       <el-table-column prop="checked_at" label="檢查時間" width="170" />
     </el-table>
   </div>
@@ -40,7 +40,7 @@ async function load() {
   loading.value = true
   try {
     // ranking data is collected by Python script, query from ranking_history
-    const res = await api.get(`/stats/clicks`, { site_id: domains.value.find(d => d.id === domainId.value)?.domain })
+    const res = await api.get('/rankings', { domain_id: domainId.value })
     rankings.value = res.data || []
   } catch (e) {
     console.warn('Rankings load failed:', e)

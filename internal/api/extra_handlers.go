@@ -365,8 +365,23 @@ func (app *App) ImportDomain(w http.ResponseWriter, r *http.Request) {
 	id, _ := res.LastInsertId()
 
 	if req.Content != nil {
+		// whitelist must match db.go contents table columns
+		allowed := map[string]bool{
+			"keyword_type": true, "target_keyword": true, "page_title": true, "meta_desc": true,
+			"h1": true, "brand_name": true, "brand_color": true, "cta_text": true, "cta_sub": true,
+			"hero_title": true, "hero_subtitle": true, "intro_text": true, "body_content": true,
+			"conclusion": true, "faq_title": true, "faq_items": true, "extra_data": true,
+			"author_name": true, "author_title": true, "author_bio": true,
+			"trust_badges": true, "disclosure": true, "disclaimer": true,
+			"feature_1_icon": true, "feature_1_title": true, "feature_1_desc": true,
+			"feature_2_icon": true, "feature_2_title": true, "feature_2_desc": true,
+			"feature_3_icon": true, "feature_3_title": true, "feature_3_desc": true,
+		}
 		app.DB.Exec("INSERT OR IGNORE INTO contents(domain_id) VALUES(?)", id)
 		for k, v := range req.Content {
+			if !allowed[k] {
+				continue
+			}
 			app.DB.Exec(fmt.Sprintf("UPDATE contents SET %s=? WHERE domain_id=?", k), v, id)
 		}
 	}
