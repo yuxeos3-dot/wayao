@@ -39,7 +39,7 @@
         <el-table-column prop="duration_ms" label="耗時(ms)" width="100" />
         <el-table-column prop="created_at" label="時間" width="170" />
         <el-table-column prop="output" label="輸出" min-width="200">
-          <template #default="{row}"><pre style="max-height:100px;overflow:auto;font-size:11px;margin:0">{{ row.output }}</pre></template>
+          <template #default="{row}"><pre style="max-height:100px;overflow:auto;font-size:11px;margin:0">{{ row.log_output }}</pre></template>
         </el-table-column>
       </el-table>
     </el-dialog>

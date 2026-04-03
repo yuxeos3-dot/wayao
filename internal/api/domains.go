@@ -176,8 +176,8 @@ func (app *App) DeleteDomain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// clean up all related data (contents handled by CASCADE)
-	app.DB.Exec("DELETE FROM clicks WHERE site_id=(SELECT domain FROM domains WHERE id=?)", id)
-	app.DB.Exec("DELETE FROM pageviews WHERE site_id=(SELECT domain FROM domains WHERE id=?)", id)
+	app.DB.Exec("DELETE FROM clicks WHERE site_id=(SELECT site_id FROM domains WHERE id=?)", id)
+	app.DB.Exec("DELETE FROM pageviews WHERE site_id=(SELECT site_id FROM domains WHERE id=?)", id)
 	app.DB.Exec("DELETE FROM ranking_history WHERE domain_id=?", id)
 	app.DB.Exec("DELETE FROM site_cluster_members WHERE domain_id=?", id)
 	app.DB.Exec("DELETE FROM domains WHERE id=?", id)
@@ -239,8 +239,8 @@ func (app *App) BatchDomainOp(w http.ResponseWriter, r *http.Request) {
 				res["status"] = "ok"
 			}
 		case "delete":
-			app.DB.Exec("DELETE FROM clicks WHERE site_id=(SELECT domain FROM domains WHERE id=?)", id)
-			app.DB.Exec("DELETE FROM pageviews WHERE site_id=(SELECT domain FROM domains WHERE id=?)", id)
+			app.DB.Exec("DELETE FROM clicks WHERE site_id=(SELECT site_id FROM domains WHERE id=?)", id)
+			app.DB.Exec("DELETE FROM pageviews WHERE site_id=(SELECT site_id FROM domains WHERE id=?)", id)
 			app.DB.Exec("DELETE FROM ranking_history WHERE domain_id=?", id)
 			app.DB.Exec("DELETE FROM site_cluster_members WHERE domain_id=?", id)
 			app.DB.Exec("DELETE FROM domains WHERE id=?", id)

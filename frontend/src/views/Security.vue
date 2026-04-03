@@ -28,15 +28,16 @@
         <div style="margin-bottom:12px">
           <el-input v-model="uaForm.pattern" placeholder="UA關鍵詞" style="width:200px;margin-right:8px" />
           <el-select v-model="uaForm.action" style="width:100px;margin-right:8px"><el-option label="封鎖" value="block" /><el-option label="允許" value="allow" /></el-select>
-          <el-input v-model="uaForm.reason" placeholder="原因" style="width:200px;margin-right:8px" />
           <el-button type="primary" @click="addUA">新增</el-button>
         </div>
         <el-table :data="uaRules" size="small">
           <el-table-column prop="pattern" label="Pattern" />
-          <el-table-column prop="action" label="動作" width="80">
-            <template #default="{row}"><el-tag :type="row.action==='block'?'danger':'success'" size="small">{{ row.action }}</el-tag></template>
+          <el-table-column prop="rule_type" label="動作" width="80">
+            <template #default="{row}"><el-tag :type="row.rule_type==='block'?'danger':'success'" size="small">{{ row.rule_type }}</el-tag></template>
           </el-table-column>
-          <el-table-column prop="reason" label="原因" />
+          <el-table-column prop="is_active" label="啟用" width="60">
+            <template #default="{row}"><el-tag :type="row.is_active?'success':'info'" size="small">{{ row.is_active?'是':'否' }}</el-tag></template>
+          </el-table-column>
           <el-table-column prop="created_at" label="時間" width="170" />
           <el-table-column label="操作" width="80">
             <template #default="{row}">
@@ -57,7 +58,7 @@ import { ElMessage } from 'element-plus'
 const ipRules = ref([])
 const uaRules = ref([])
 const ipForm = ref({ ip: '', action: 'block', reason: '' })
-const uaForm = ref({ pattern: '', action: 'block', reason: '' })
+const uaForm = ref({ pattern: '', action: 'block' })
 
 async function loadIP() { try { const res = await api.listIPRules(); ipRules.value = res.data || [] } catch {} }
 async function loadUA() { try { const res = await api.listUARules(); uaRules.value = res.data || [] } catch {} }
@@ -68,7 +69,7 @@ async function addIP() {
 }
 async function addUA() {
   if (!uaForm.value.pattern) return
-  try { await api.addUARule(uaForm.value); ElMessage.success('已新增'); uaForm.value = { pattern: '', action: 'block', reason: '' }; loadUA() } catch (e) { ElMessage.error(e.message) }
+  try { await api.addUARule(uaForm.value); ElMessage.success('已新增'); uaForm.value = { pattern: '', action: 'block' }; loadUA() } catch (e) { ElMessage.error(e.message) }
 }
 async function delIP(id) { try { await api.deleteIPRule(id); loadIP() } catch {} }
 async function delUA(id) { try { await api.deleteUARule(id); loadUA() } catch {} }

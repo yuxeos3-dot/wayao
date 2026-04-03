@@ -54,6 +54,9 @@ type siteInfo struct {
 	AuthorName      string
 	AuthorTitle     string
 	AuthorBio       string
+	LastUpdated     string
+	LastUpdatedISO  string
+	ReviewCount     string
 	TrustBadges     string
 	Disclosure      string
 	Disclaimer      string
@@ -255,6 +258,9 @@ params:
   author_name: "%s"
   author_title: "%s"
   author_bio: "%s"
+  last_updated: "%s"
+  last_updated_iso: "%s"
+  review_count: "%s"
   faq_title: "%s"
   trust_badges: '%s'
   disclosure: "%s"
@@ -291,6 +297,7 @@ params:
 		variation.GenerateFaviconSVG(site.Domain, site.BrandColor),
 		"", // hreflang_tags placeholder - populated by cluster logic
 		escYAML(authorName), escYAML(authorTitle), escYAML(authorBio),
+		escYAML(site.LastUpdated), escYAML(site.LastUpdatedISO), escYAML(site.ReviewCount),
 		escYAML(site.FAQTitle),
 		escYAML(site.TrustBadges), escYAML(site.Disclosure), escYAML(site.Disclaimer),
 		escYAML(site.Feature1Icon), escYAML(site.Feature1Title), escYAML(site.Feature1Desc),
@@ -345,6 +352,7 @@ func (b *Builder) loadSiteInfo(domainID int64) (*siteInfo, error) {
 		COALESCE(page_title,''), COALESCE(meta_desc,''), COALESCE(h1,''),
 		COALESCE(faq_title,'常見問題'), COALESCE(faq_items,'[]'), COALESCE(extra_data,'{}'),
 		COALESCE(author_name,''), COALESCE(author_title,''), COALESCE(author_bio,''),
+		COALESCE(last_updated,''), COALESCE(last_updated_iso,''), COALESCE(review_count,''),
 		COALESCE(trust_badges,'[]'), COALESCE(disclosure,''), COALESCE(disclaimer,''),
 		COALESCE(feature_1_icon,''), COALESCE(feature_1_title,''), COALESCE(feature_1_desc,''),
 		COALESCE(feature_2_icon,''), COALESCE(feature_2_title,''), COALESCE(feature_2_desc,''),
@@ -357,6 +365,7 @@ func (b *Builder) loadSiteInfo(domainID int64) (*siteInfo, error) {
 			&s.PageTitle, &s.MetaDesc, &s.H1,
 			&s.FAQTitle, &s.FAQItems, &s.ExtraData,
 			&s.AuthorName, &s.AuthorTitle, &s.AuthorBio,
+			&s.LastUpdated, &s.LastUpdatedISO, &s.ReviewCount,
 			&s.TrustBadges, &s.Disclosure, &s.Disclaimer,
 			&s.Feature1Icon, &s.Feature1Title, &s.Feature1Desc,
 			&s.Feature2Icon, &s.Feature2Title, &s.Feature2Desc,

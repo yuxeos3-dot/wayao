@@ -27,11 +27,11 @@
       <el-table-column prop="id" label="ID" width="60" />
       <el-table-column prop="keyword" label="關鍵詞" min-width="200" />
       <el-table-column prop="category" label="分類" width="100" />
-      <el-table-column prop="volume" label="搜索量" width="80" sortable />
-      <el-table-column prop="kd" label="KD" width="60" />
+      <el-table-column prop="monthly_vol" label="搜索量" width="80" sortable />
+      <el-table-column prop="difficulty" label="KD" width="60" />
       <el-table-column prop="cpc" label="CPC" width="70" />
-      <el-table-column prop="is_assigned" label="分配" width="60">
-        <template #default="{row}"><el-tag :type="row.is_assigned?'success':'info'" size="small">{{ row.is_assigned?'是':'否' }}</el-tag></template>
+      <el-table-column prop="status" label="分配" width="60">
+        <template #default="{row}"><el-tag :type="row.status==='assigned'?'success':'info'" size="small">{{ row.status==='assigned'?'是':'否' }}</el-tag></template>
       </el-table-column>
       <el-table-column label="操作" width="100">
         <template #default="{row}">
