@@ -240,13 +240,70 @@ func (app *App) BatchHealthCheck(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	defer rows.Close()
-	var results []map[string]interface{}
-	for rows.Next() {
-		var id int64
-		var domain, status string
-		rows.Scan(&id, &domain, &status)
-		results = append(results, map[string]interface{}{"id": id, "domain": domain, "status": status})
+
+	type domainInfo struct {
+		ID     int64
+		Domain string
+		Status string
 	}
+	var domains []domainInfo
+	for rows.Next() {
+		var d domainInfo
+		rows.Scan(&d.ID, &d.Domain, &d.Status)
+		domains = append(domains, d)
+	}
+
+	// real HTTP check with concurrency limit
+	client := &http.Client{Timeout: 10 * time.Second}
+	sem := make(chan struct{}, 5)
+	var mu sync.Mutex
+	var results []map[string]interface{}
+
+	var wg sync.WaitGroup
+	for _, d := range domains {
+		d := d
+		wg.Add(1)
+		sem <- struct{}{}
+		go func() {
+			defer wg.Done()
+			defer func() { <-sem }()
+
+			score := 100
+			var issues []string
+			ttfb := 0
+
+			start := time.Now()
+			resp, httpErr := client.Get("https://" + d.Domain + "/")
+			ttfb = int(time.Since(start).Milliseconds())
+
+			if httpErr != nil {
+				score -= 40
+				issues = append(issues, "HTTP error: "+httpErr.Error())
+			} else {
+				resp.Body.Close()
+				if resp.StatusCode != 200 {
+					score -= 20
+					issues = append(issues, fmt.Sprintf("HTTP %d", resp.StatusCode))
+				}
+				if ttfb > 3000 {
+					score -= 10
+					issues = append(issues, fmt.Sprintf("Slow: %dms", ttfb))
+				}
+			}
+			if score < 0 {
+				score = 0
+			}
+
+			mu.Lock()
+			results = append(results, map[string]interface{}{
+				"id": d.ID, "domain": d.Domain, "status": d.Status,
+				"score": score, "ttfb_ms": ttfb, "issues": issues,
+			})
+			mu.Unlock()
+		}()
+	}
+	wg.Wait()
+
 	if results == nil {
 		results = []map[string]interface{}{}
 	}

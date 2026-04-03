@@ -104,8 +104,10 @@ func (app *App) CreateDomain(w http.ResponseWriter, r *http.Request) {
 	if req.KeywordType == "" {
 		req.KeywordType = "brand"
 	}
-	res, err := app.DB.Exec(`INSERT INTO domains(domain,template_id,market,language,keyword_type,primary_keyword,redirect_url) VALUES(?,?,?,?,?,?,?)`,
-		req.Domain, req.TemplateID, req.Market, req.Language, req.KeywordType, req.PrimaryKeyword, req.RedirectURL)
+	// auto-generate site_id from domain if not provided
+	siteID := strings.ReplaceAll(strings.ReplaceAll(req.Domain, ".", "_"), "-", "_")
+	res, err := app.DB.Exec(`INSERT INTO domains(domain,template_id,market,language,keyword_type,primary_keyword,redirect_url,site_id) VALUES(?,?,?,?,?,?,?,?)`,
+		req.Domain, req.TemplateID, req.Market, req.Language, req.KeywordType, req.PrimaryKeyword, req.RedirectURL, siteID)
 	if err != nil {
 		jsonError(w, 500, err.Error())
 		return

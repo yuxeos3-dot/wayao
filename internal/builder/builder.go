@@ -270,8 +270,10 @@ params:
   feature_3_desc: "%s"
   schema_json: |
     %s
-  faq_items: '%s'
-  extra_data: '%s'
+  faq_items: |
+    %s
+  extra_data: |
+    %s
 %s
 `,
 		site.Domain, site.Language, escYAML(site.BrandName),
@@ -295,7 +297,7 @@ params:
 		escYAML(site.Feature2Icon), escYAML(site.Feature2Title), escYAML(site.Feature2Desc),
 		escYAML(site.Feature3Icon), escYAML(site.Feature3Title), escYAML(site.Feature3Desc),
 		strings.ReplaceAll(schemaJSON, "\n", "\n    "),
-		escYAML(site.FAQItems), escYAML(site.ExtraData),
+		indentYAML(site.FAQItems, "    "), indentYAML(site.ExtraData, "    "),
 		extraParams,
 	)
 

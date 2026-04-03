@@ -589,17 +589,55 @@ func (app *App) ExportDomain(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var content map[string]interface{}
-	var brandName, brandColor, heroTitle, heroSubtitle, bodyContent, pageTitle, metaDesc, faqItems, extraData string
-	err = app.DB.QueryRow("SELECT brand_name, brand_color, hero_title, hero_subtitle, body_content, page_title, meta_desc, faq_items, extra_data FROM contents WHERE domain_id=?", id).
-		Scan(&brandName, &brandColor, &heroTitle, &heroSubtitle, &bodyContent, &pageTitle, &metaDesc, &faqItems, &extraData)
-	if err == nil {
+	// export ALL content fields to prevent data loss on reimport
+	content := map[string]interface{}{}
+	rows, qErr := app.DB.Query(`SELECT
+		keyword_type, target_keyword, page_title, meta_desc, h1,
+		brand_name, brand_color, cta_text, cta_sub, hero_title, hero_subtitle,
+		feature_1_icon, feature_1_title, feature_1_desc,
+		feature_2_icon, feature_2_title, feature_2_desc,
+		feature_3_icon, feature_3_title, feature_3_desc,
+		intro_text, body_content, conclusion,
+		faq_title, faq_items, extra_data,
+		author_name, author_title, author_bio, author_avatar,
+		last_updated, last_updated_iso, review_count,
+		trust_badges, disclosure, disclaimer, content_angle
+		FROM contents WHERE domain_id=?`, id)
+	if qErr == nil && rows.Next() {
+		var kwt, targetKW, pageTitle, metaDesc, h1 string
+		var brandName, brandColor, ctaText, ctaSub, heroTitle, heroSub string
+		var f1i, f1t, f1d, f2i, f2t, f2d, f3i, f3t, f3d string
+		var intro, body, conclusion string
+		var faqTitle, faqItems, extraData string
+		var authorName, authorTitle, authorBio, authorAvatar string
+		var lastUpd, lastUpdISO, reviewCnt string
+		var trustBadges, disclosure, disclaimer, angle string
+		rows.Scan(&kwt, &targetKW, &pageTitle, &metaDesc, &h1,
+			&brandName, &brandColor, &ctaText, &ctaSub, &heroTitle, &heroSub,
+			&f1i, &f1t, &f1d, &f2i, &f2t, &f2d, &f3i, &f3t, &f3d,
+			&intro, &body, &conclusion,
+			&faqTitle, &faqItems, &extraData,
+			&authorName, &authorTitle, &authorBio, &authorAvatar,
+			&lastUpd, &lastUpdISO, &reviewCnt,
+			&trustBadges, &disclosure, &disclaimer, &angle)
 		content = map[string]interface{}{
+			"keyword_type": kwt, "target_keyword": targetKW,
+			"page_title": pageTitle, "meta_desc": metaDesc, "h1": h1,
 			"brand_name": brandName, "brand_color": brandColor,
-			"hero_title": heroTitle, "hero_subtitle": heroSubtitle, "body_content": bodyContent,
-			"page_title": pageTitle, "meta_desc": metaDesc,
-			"faq_items": faqItems, "extra_data": extraData,
+			"cta_text": ctaText, "cta_sub": ctaSub,
+			"hero_title": heroTitle, "hero_subtitle": heroSub,
+			"feature_1_icon": f1i, "feature_1_title": f1t, "feature_1_desc": f1d,
+			"feature_2_icon": f2i, "feature_2_title": f2t, "feature_2_desc": f2d,
+			"feature_3_icon": f3i, "feature_3_title": f3t, "feature_3_desc": f3d,
+			"intro_text": intro, "body_content": body, "conclusion": conclusion,
+			"faq_title": faqTitle, "faq_items": faqItems, "extra_data": extraData,
+			"author_name": authorName, "author_title": authorTitle,
+			"author_bio": authorBio, "author_avatar": authorAvatar,
+			"last_updated": lastUpd, "last_updated_iso": lastUpdISO,
+			"review_count": reviewCnt, "trust_badges": trustBadges,
+			"disclosure": disclosure, "disclaimer": disclaimer, "content_angle": angle,
 		}
+		rows.Close()
 	}
 
 	export := map[string]interface{}{

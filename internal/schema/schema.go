@@ -131,10 +131,13 @@ func GenerateSchema(site SiteData) string {
 
 	case "sports":
 		schemas = append(schemas, map[string]interface{}{
-			"@type":       "SportsEvent",
-			"name":        site.PrimaryKeyword,
-			"description": site.MetaDesc,
-			"url":         "https://" + site.Domain,
+			"@type":          "Article",
+			"headline":       site.MetaTitle,
+			"description":    site.MetaDesc,
+			"articleSection":  "體育投注",
+			"datePublished":  pubDate,
+			"dateModified":   modDate,
+			"author":         map[string]interface{}{"@type": "Person", "name": getStr(site.ExtraFields, "author_name", "Editor")},
 		})
 
 	case "app":

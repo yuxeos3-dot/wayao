@@ -2,10 +2,12 @@ package db
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
+	"strings"
 
 	_ "github.com/mattn/go-sqlite3"
 )
@@ -19,11 +21,13 @@ func InitDB(dataDir string) (*sql.DB, error) {
 	if err != nil {
 		return nil, fmt.Errorf("open db: %w", err)
 	}
-	db.SetMaxOpenConns(1) // SQLite single-writer
+	db.SetMaxOpenConns(1)
 	if err := migrate(db); err != nil {
 		db.Close()
 		return nil, fmt.Errorf("migrate: %w", err)
 	}
+	// seed title_pool from data/titles/*.json
+	seedTitlePool(db, dataDir)
 	log.Printf("[DB] initialized at %s", dbPath)
 	return db, nil
 }
@@ -31,6 +35,46 @@ func InitDB(dataDir string) (*sql.DB, error) {
 func migrate(db *sql.DB) error {
 	_, err := db.Exec(schema)
 	return err
+}
+
+// seedTitlePool loads title patterns from JSON files into title_pool table
+func seedTitlePool(db *sql.DB, dataDir string) {
+	titlesDir := filepath.Join(dataDir, "titles")
+	files, err := os.ReadDir(titlesDir)
+	if err != nil {
+		// titles dir doesn't exist in dataDir, try relative path
+		titlesDir = filepath.Join("data", "titles")
+		files, err = os.ReadDir(titlesDir)
+		if err != nil {
+			return
+		}
+	}
+	inserted := 0
+	for _, f := range files {
+		if !strings.HasSuffix(f.Name(), "_titles.json") {
+			continue
+		}
+		kwType := strings.TrimSuffix(f.Name(), "_titles.json")
+		data, err := os.ReadFile(filepath.Join(titlesDir, f.Name()))
+		if err != nil {
+			continue
+		}
+		var patterns []string
+		if json.Unmarshal(data, &patterns) != nil {
+			continue
+		}
+		for _, p := range patterns {
+			res, _ := db.Exec("INSERT OR IGNORE INTO title_pool(keyword_type, slot, template, market) VALUES(?, 'title', ?, 'zh-TW')", kwType, p)
+			if res != nil {
+				if n, _ := res.RowsAffected(); n > 0 {
+					inserted++
+				}
+			}
+		}
+	}
+	if inserted > 0 {
+		log.Printf("[DB] seeded %d title patterns into title_pool", inserted)
+	}
 }
 
 const schema = `
