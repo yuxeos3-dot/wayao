@@ -79,7 +79,11 @@ CREATE TABLE IF NOT EXISTS settings (
 );
 
 INSERT OR IGNORE INTO settings(key, value) VALUES
+<<<<<<< HEAD
     ('site_title', 'BrandSite Pro'),
+=======
+    ('site_title', 'Wayao CMS'),
+>>>>>>> 90adefdc839ffaeedc55c4dded5e12b4fcc7ec31
     ('api_token', ''),
     ('tracker_url', ''),
     ('hugo_path', '/usr/local/bin/hugo'),

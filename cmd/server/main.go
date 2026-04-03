@@ -18,7 +18,11 @@ import (
 
 func main() {
 	cfg := config.Load()
+<<<<<<< HEAD
 	log.Printf("[MAIN] BrandSite Pro starting on :%s", cfg.Port)
+=======
+	log.Printf("[MAIN] Wayao CMS starting on :%s", cfg.Port)
+>>>>>>> 90adefdc839ffaeedc55c4dded5e12b4fcc7ec31
 	log.Printf("[MAIN] data=%s templates=%s hugo=%s", cfg.DataDir, cfg.TemplDir, cfg.HugoPath)
 
 	database, err := db.InitDB(cfg.DataDir)

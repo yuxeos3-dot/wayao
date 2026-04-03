@@ -1,6 +1,11 @@
 {
+<<<<<<< HEAD
   "name": "brandsite-admin",
   "version": "1.0.0",
+=======
+  "name": "wayao-cms",
+  "version": "2.0.0",
+>>>>>>> 90adefdc839ffaeedc55c4dded5e12b4fcc7ec31
   "private": true,
   "type": "module",
   "scripts": {

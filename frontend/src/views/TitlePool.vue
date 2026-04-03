@@ -1,5 +1,6 @@
 <template>
   <div>
+<<<<<<< HEAD
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <h2 style="margin:0">標題變體池</h2>
       <el-button type="primary" @click="showAdd=true">新增變體</el-button>
@@ -33,6 +34,62 @@
         <el-form-item label="標題模式"><el-input v-model="form.template" placeholder="{keyword} - {year}最新評測｜專業推薦" /><div style="color:#909399;font-size:12px;margin-top:4px">可用變數: {keyword}, {year}</div></el-form-item>
       </el-form>
       <template #footer><el-button @click="showAdd=false">取消</el-button><el-button type="primary" @click="save">保存</el-button></template>
+=======
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">标题池</h1>
+        <p class="page-subtitle">管理各词类的标题变体模版, 支持 {keyword} 和 {year} 变量</p>
+      </div>
+      <el-button type="primary" @click="showAdd=true">新增变体</el-button>
+    </div>
+
+    <div class="filter-bar">
+      <el-select v-model="filter" placeholder="筛选词类" clearable @change="load" style="width:180px">
+        <el-option v-for="t in kwTypes" :key="t" :label="t" :value="t" />
+      </el-select>
+    </div>
+
+    <div class="section-card">
+      <div class="section-body" style="padding:0">
+        <el-table :data="list" v-loading="loading" size="small">
+          <el-table-column prop="id" label="ID" width="60" />
+          <el-table-column prop="keyword_type" label="词类" width="100">
+            <template #default="{row}"><el-tag size="small">{{ row.keyword_type }}</el-tag></template>
+          </el-table-column>
+          <el-table-column prop="template" label="标题模式" min-width="300">
+            <template #default="{row}"><code style="font-size:13px;color:var(--wayao-text)">{{ row.template }}</code></template>
+          </el-table-column>
+          <el-table-column prop="is_active" label="状态" width="80">
+            <template #default="{row}"><el-tag :type="row.is_active?'success':'info'" size="small">{{ row.is_active?'启用':'停用' }}</el-tag></template>
+          </el-table-column>
+          <el-table-column label="操作" width="80">
+            <template #default="{row}">
+              <el-popconfirm title="确定删除?" @confirm="del(row.id)">
+                <template #reference><el-button size="small" type="danger" text>删除</el-button></template>
+              </el-popconfirm>
+            </template>
+          </el-table-column>
+        </el-table>
+      </div>
+    </div>
+
+    <el-dialog v-model="showAdd" title="新增标题变体" width="520">
+      <el-form :model="form" label-width="80px">
+        <el-form-item label="词类">
+          <el-select v-model="form.keyword_type" style="width:100%">
+            <el-option v-for="t in kwTypes" :key="t" :label="t" :value="t" />
+          </el-select>
+        </el-form-item>
+        <el-form-item label="标题模式">
+          <el-input v-model="form.template" placeholder="{keyword} - {year}最新评测｜专业推荐" />
+          <p style="color:var(--wayao-text-secondary);font-size:12px;margin-top:6px">可用变量: <code>{keyword}</code>, <code>{year}</code></p>
+        </el-form-item>
+      </el-form>
+      <template #footer>
+        <el-button @click="showAdd=false">取消</el-button>
+        <el-button type="primary" @click="save">保存</el-button>
+      </template>
+>>>>>>> 90adefdc839ffaeedc55c4dded5e12b4fcc7ec31
     </el-dialog>
   </div>
 </template>

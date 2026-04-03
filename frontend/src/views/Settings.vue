@@ -1,5 +1,6 @@
 <template>
   <div>
+<<<<<<< HEAD
     <h2>系統設定</h2>
     <el-card v-loading="loading">
       <el-tabs v-model="activeTab">
@@ -65,6 +66,86 @@
         <el-button type="primary" @click="save" :loading="saving">保存設定</el-button>
       </div>
     </el-card>
+=======
+    <div class="page-header">
+      <div>
+        <h1 class="page-title">系统设置</h1>
+        <p class="page-subtitle">服务配置、API密钥与功能开关</p>
+      </div>
+      <el-button type="primary" @click="save" :loading="saving" size="large">保存设置</el-button>
+    </div>
+
+    <el-tabs v-model="activeTab">
+      <el-tab-pane label="基础配置" name="basic">
+        <div class="section-card">
+          <div class="section-body">
+            <el-form :model="settings" label-width="160px" style="max-width:600px">
+              <el-form-item label="Hugo 路径"><el-input v-model="settings.hugo_path" /></el-form-item>
+              <el-form-item label="站点根目录"><el-input v-model="settings.sites_root" /></el-form-item>
+              <el-form-item label="默认服务器 IP"><el-input v-model="settings.default_server_ip" /></el-form-item>
+              <el-form-item label="默认 SSH 用户"><el-input v-model="settings.default_server_user" /></el-form-item>
+              <el-form-item label="追踪器 URL"><el-input v-model="settings.tracker_url" placeholder="https://tracker.yourdomain.com" /></el-form-item>
+              <el-form-item label="CC限速 (次/分钟)"><el-input-number v-model.number="ccLimit" :min="10" :max="1000" /></el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="API 密钥" name="api">
+        <div class="section-card">
+          <div class="section-body">
+            <el-form :model="settings" label-width="160px" style="max-width:600px">
+              <el-form-item label="Claude API Key">
+                <el-input v-model="settings.claude_api_key" type="password" show-password placeholder="sk-ant-..." />
+                <p style="color:var(--wayao-text-secondary);font-size:12px;margin-top:4px">用于 AI 内容生成</p>
+              </el-form-item>
+              <el-form-item label="Ahrefs API Key"><el-input v-model="settings.ahrefs_api_key" type="password" show-password /></el-form-item>
+              <el-form-item label="SerpAPI Key"><el-input v-model="settings.serpapi_key" type="password" show-password /></el-form-item>
+              <el-form-item label="Bing WMT Key"><el-input v-model="settings.bing_wmt_key" type="password" show-password /></el-form-item>
+              <el-divider />
+              <el-form-item label="修改密码">
+                <el-row :gutter="12">
+                  <el-col :span="8"><el-input v-model="oldPw" type="password" placeholder="旧密码" /></el-col>
+                  <el-col :span="8"><el-input v-model="newPw" type="password" placeholder="新密码 (至少6位)" /></el-col>
+                  <el-col :span="4"><el-button @click="changePw">修改</el-button></el-col>
+                </el-row>
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </el-tab-pane>
+
+      <el-tab-pane label="功能开关" name="features">
+        <div class="section-card">
+          <div class="section-body">
+            <el-form :model="settings" label-width="220px" style="max-width:600px">
+              <el-form-item label="构建后自动推送 IndexNow">
+                <el-switch v-model="settings.indexnow_auto" active-value="1" inactive-value="0" />
+              </el-form-item>
+              <el-form-item label="内容自动更新调度">
+                <el-switch v-model="settings.content_refresh_on" active-value="1" inactive-value="0" />
+              </el-form-item>
+              <el-form-item label="城市词矩阵">
+                <el-switch v-model="settings.city_matrix_on" active-value="1" inactive-value="0" />
+              </el-form-item>
+              <el-form-item label="OG 图片动态生成">
+                <el-switch v-model="settings.og_image_enabled" active-value="1" inactive-value="0" />
+              </el-form-item>
+              <el-form-item label="支撑页面自动生成">
+                <el-switch v-model="settings.support_pages_auto" active-value="1" inactive-value="0" />
+              </el-form-item>
+              <el-form-item label="CSS 噪声注入 (反指纹)">
+                <el-switch v-model="settings.css_noise_enabled" active-value="1" inactive-value="0" />
+              </el-form-item>
+              <el-form-item label="Schema 字段顺序随机化">
+                <el-switch v-model="settings.schema_shuffle" active-value="1" inactive-value="0" />
+              </el-form-item>
+            </el-form>
+          </div>
+        </div>
+      </el-tab-pane>
+    </el-tabs>
+>>>>>>> 90adefdc839ffaeedc55c4dded5e12b4fcc7ec31
   </div>
 </template>
 
@@ -87,14 +168,19 @@ const ccLimit = computed({
 
 async function load() {
   loading.value = true
+<<<<<<< HEAD
   try {
     const res = await api.getSettings()
     settings.value = res.data || {}
   } finally { loading.value = false }
+=======
+  try { const res = await api.getSettings(); settings.value = res.data || {} } finally { loading.value = false }
+>>>>>>> 90adefdc839ffaeedc55c4dded5e12b4fcc7ec31
 }
 
 async function save() {
   saving.value = true
+<<<<<<< HEAD
   try {
     await api.saveSettings(settings.value)
     ElMessage.success('設定已保存')
@@ -107,6 +193,17 @@ async function changePw() {
     const res = await api.changePassword({ old_password: oldPw.value, new_password: newPw.value })
     localStorage.setItem('token', res.data.token)
     ElMessage.success('密碼已修改')
+=======
+  try { await api.saveSettings(settings.value); ElMessage.success('设置已保存') } catch (e) { ElMessage.error(e.message) } finally { saving.value = false }
+}
+
+async function changePw() {
+  if (!newPw.value || newPw.value.length < 6) { ElMessage.warning('新密码至少6位'); return }
+  try {
+    const res = await api.changePassword({ old_password: oldPw.value, new_password: newPw.value })
+    localStorage.setItem('token', res.data.token)
+    ElMessage.success('密码已修改')
+>>>>>>> 90adefdc839ffaeedc55c4dded5e12b4fcc7ec31
     oldPw.value = ''; newPw.value = ''
   } catch (e) { ElMessage.error(e.message) }
 }
